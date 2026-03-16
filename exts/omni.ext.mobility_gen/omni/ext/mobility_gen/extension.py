@@ -20,6 +20,7 @@ import os
 import datetime
 import tempfile
 import glob
+import carb
 
 import omni.ext
 import omni.ui as ui
@@ -37,10 +38,13 @@ from omni.ext.mobility_gen.build import build_scenario_from_config
 if "MOBILITY_GEN_DATA" in os.environ:
     DATA_DIR = os.environ['MOBILITY_GEN_DATA']
 else:
-    DATA_DIR = os.path.expanduser("~/MobilityGenData")
+    # DATA_DIR = os.path.expanduser("~/MobilityGenData")
+    DATA_DIR = "C:/isaacsim/_out"
 
-RECORDINGS_DIR = os.path.join(DATA_DIR, "recordings")
-SCENARIOS_DIR = os.path.join(DATA_DIR, "scenarios")
+# RECORDINGS_DIR = os.path.join(DATA_DIR, "recordings")
+RECORDINGS_DIR = DATA_DIR + "/recordings"
+# SCENARIOS_DIR = os.path.join(DATA_DIR, "scenarios")
+SCENARIOS_DIR = DATA_DIR + "/scenarios"
 
 
 class MobilityGenExtension(omni.ext.IExt):
@@ -78,7 +82,7 @@ class MobilityGenExtension(omni.ext.IExt):
                 with ui.VStack():
                     with ui.HStack():
                         ui.Label("USD Path / URL")
-                        self.scene_usd_field_string_model = ui.SimpleStringModel()
+                        self.scene_usd_field_string_model = ui.SimpleStringModel(defaultValue="F:/UserData/12_CG/06_IsaacSim/isaac-sim-assets-complete-5.1.0/Assets/Isaac/5.1/Isaac/Environments/Simple_Room/simple_room.usd")
                         self.scene_usd_field = ui.StringField(model=self.scene_usd_field_string_model, height=25)
 
                     with ui.HStack():
@@ -144,7 +148,10 @@ class MobilityGenExtension(omni.ext.IExt):
 
     def start_new_recording(self):
         recording_name = datetime.datetime.now().isoformat()
-        recording_path = os.path.join(RECORDINGS_DIR, recording_name)
+        recording_name = recording_name.replace(":", "")
+        recording_name = recording_name.replace(".", "")
+        # recording_path = os.path.join(RECORDINGS_DIR, recording_name)
+        recording_path = RECORDINGS_DIR + "/" + recording_name
         writer = Writer(recording_path)
         writer.write_config(self.config)
         writer.write_occupancy_map(self.scenario.occupancy_map)
@@ -208,7 +215,9 @@ class MobilityGenExtension(omni.ext.IExt):
             config = self.create_config()
 
             self.config = config
+            carb.log_info(f"Building scenario from config: {config}")
             self.scenario = await build_scenario_from_config(config)
+            # self.scenario = build_scenario_from_config(config)
 
             self.draw_occ_map()
             

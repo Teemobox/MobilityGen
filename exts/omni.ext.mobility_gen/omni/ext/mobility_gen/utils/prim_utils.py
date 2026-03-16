@@ -21,6 +21,35 @@ import numpy as np
 import math
 
 
+def join_prim_path(*parts: str) -> str:
+    """Join USD prim path parts using forward slashes (Unix-style).
+    
+    USD prim paths must always use forward slashes regardless of the operating system.
+    This function ensures proper path joining for USD prim paths.
+    
+    Args:
+        *parts: Path components to join
+        
+    Returns:
+        Joined path with forward slashes
+    """
+    # Filter out empty parts and strip slashes
+    filtered_parts = []
+    for part in parts:
+        if part:
+            # Remove leading/trailing slashes and backslashes
+            part = part.strip('/\\')
+            if part:
+                filtered_parts.append(part)
+    
+    if not filtered_parts:
+        return ""
+    
+    # Join with forward slashes and ensure it starts with /
+    result = '/' + '/'.join(filtered_parts)
+    return result
+
+
 def prim_add_collision(prim: Usd.Prim):
     UsdPhysics.CollisionAPI.Apply(prim)
     return prim

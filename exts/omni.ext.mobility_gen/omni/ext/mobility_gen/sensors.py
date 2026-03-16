@@ -24,6 +24,7 @@ from isaacsim.core.prims import SingleXFormPrim as XFormPrim
 
 from omni.ext.mobility_gen.utils.global_utils import get_stage
 from omni.ext.mobility_gen.utils.stage_utils import stage_add_usd_ref
+from omni.ext.mobility_gen.utils.prim_utils import join_prim_path
 from omni.ext.mobility_gen.common import Module, Buffer
 
 
@@ -180,7 +181,7 @@ class Camera(Sensor):
 
 class HawkCamera(Sensor):
 
-    usd_url: str = "http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/4.2/Isaac/Sensors/LeopardImaging/Hawk/hawk_v1.1_nominal.usd"
+    usd_url: str = "F:/UserData/12_CG/06_IsaacSim/isaac-sim-assets-complete-5.1.0/Assets/Isaac/5.1/Isaac/Sensors/LeopardImaging/Hawk/hawk_v1.1_nominal.usd"
     resolution: Tuple[int, int] = (960, 600)
     left_camera_path: str = "left/camera_left"
     right_camera_path: str = "right/camera_right"
@@ -208,7 +209,7 @@ class HawkCamera(Sensor):
     @classmethod
     def attach(cls, prim_path: str) -> "HawkCamera":
         
-        left_camera = Camera(os.path.join(prim_path, cls.left_camera_path), cls.resolution)
-        right_camera = Camera(os.path.join(prim_path, cls.right_camera_path), cls.resolution)
+        left_camera = Camera(join_prim_path(prim_path, cls.left_camera_path), cls.resolution)
+        right_camera = Camera(join_prim_path(prim_path, cls.right_camera_path), cls.resolution)
 
         return HawkCamera(left_camera, right_camera)

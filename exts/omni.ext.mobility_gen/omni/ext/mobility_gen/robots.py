@@ -19,6 +19,7 @@ import numpy as np
 import os
 import math
 from typing import List, Type, Tuple, Union
+from isaacsim.storage.native import get_assets_root_path
 
 # Isaac Sim Imports
 from isaacsim.core.prims import SingleXFormPrim as XFormPrim
@@ -38,6 +39,8 @@ from omni.ext.mobility_gen.utils.stage_utils import stage_get_prim, stage_add_ca
 from omni.ext.mobility_gen.utils.prim_utils import prim_rotate_x, prim_rotate_y, prim_rotate_z, prim_translate
 from omni.ext.mobility_gen.types import Pose2d
 from omni.ext.mobility_gen.utils.registry import Registry
+from omni.ext.mobility_gen.utils.prim_utils import join_prim_path
+import carb
 
 
 #=========================================================
@@ -145,7 +148,7 @@ class Robot(Module):
     def build_front_camera(cls, prim_path):
         
         # Add camera
-        camera_path = os.path.join(prim_path, cls.front_camera_base_path)
+        camera_path = join_prim_path(prim_path, cls.front_camera_base_path)
         front_camera_xform = XFormPrim(camera_path)
 
         stage = get_stage()
@@ -161,7 +164,7 @@ class Robot(Module):
 
         stage = get_stage()
 
-        camera_path = os.path.join(self.prim_path, self.chase_camera_base_path, "chase_camera")
+        camera_path = join_prim_path(self.prim_path, self.chase_camera_base_path, "chase_camera")
         stage_add_camera(stage, 
             camera_path, 
             focal_length=10, horizontal_aperature=30, vertical_aperature=30
@@ -260,7 +263,7 @@ class WheeledRobot(Robot):
         ))
 
         view = _ArticulationView(
-            os.path.join(prim_path, cls.chassis_subpath)
+            join_prim_path(prim_path, cls.chassis_subpath)
         )
 
         world.scene.add(view)
@@ -325,12 +328,13 @@ class IsaacLabRobot(Robot):
 
         # Articulation
         view = _ArticulationView(
-            os.path.join(prim_path, cls.articulation_path)
+            join_prim_path(prim_path, cls.articulation_path)
         )
 
         world.scene.add(view)
 
         # Controller
+        carb.log_info(f"build_policy: prim_path: {prim_path}")
         controller = cls.build_policy(prim_path)
 
         prim = stage_get_prim(stage, prim_path)        
@@ -406,7 +410,7 @@ class JetbotRobot(WheeledRobot):
     path_following_target_point_offset_meters: float = 1.0
 
     wheel_dof_names: List[str] = ["left_wheel_joint", "right_wheel_joint"]
-    usd_url: str = "http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/4.2/Isaac/Robots/Jetbot/jetbot.usd"
+    usd_url: str = "F:/UserData/12_CG/06_IsaacSim/isaac-sim-assets-complete-5.1.0/Assets/Isaac/5.1/Isaac/Robots/NVIDIA/Jetbot/jetbot.usd"
     chassis_subpath: str = "chassis"
     wheel_base: float = 0.1125
     wheel_radius: float = 0.03
@@ -454,7 +458,7 @@ class CarterRobot(WheeledRobot):
     path_following_target_point_offset_meters: float = 1.0
 
     wheel_dof_names: List[str] = ["joint_wheel_left", "joint_wheel_right"]
-    usd_url: str = "http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/4.2/Isaac/Robots/Carter/nova_carter_sensors.usd"
+    usd_url: str = "F:/UserData/12_CG/06_IsaacSim/isaac-sim-assets-complete-5.1.0/Assets/Isaac/5.1/Isaac/Robots/NVIDIA/NovaCarter/Variants/Sensors/nova_carter_sensors.usd"
     chassis_subpath: str = "chassis_link"
     wheel_base = 0.413
     wheel_radius = 0.14
@@ -501,12 +505,19 @@ class H1Robot(IsaacLabRobot):
     path_following_forward_angle_threshold = math.pi / 4
     path_following_target_point_offset_meters: float = 1.0
 
-    usd_url = "http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/4.2/Isaac/Robots/Unitree/H1/h1.usd"
+    usd_url = "F:/UserData/12_CG/06_IsaacSim/isaac-sim-assets-complete-5.1.0/Assets/Isaac/5.1/Isaac/Robots/Unitree/H1/h1.usd"
     articulation_path = "pelvis"
     controller_z_offset: float = 1.05
 
     @classmethod
     def build_policy(cls, prim_path: str):
+        carb.log_info(f"get_assets_root_path: {get_assets_root_path()}")
+        h1_assets_path = get_assets_root_path() + "/Isaac/Robots/Unitree/H1/h1.usd"
+        if not os.path.exists(h1_assets_path):
+            carb.log_error(f"H1 robot USD file not found at {h1_assets_path}")
+            raise FileNotFoundError(f"H1 robot USD file not found at {h1_assets_path}")
+        else:
+            carb.log_info(f"H1 robot USD file found at {h1_assets_path}")
         return H1FlatTerrainPolicy(
             prim_path=prim_path,
             position=np.array([0., 0., cls.controller_z_offset])
@@ -553,7 +564,7 @@ class SpotRobot(IsaacLabRobot):
     path_following_forward_angle_threshold = math.pi / 4
     path_following_target_point_offset_meters: float = 1.0
 
-    usd_url = "http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/4.2/Isaac/Robots/BostonDynamics/spot/spot.usd"
+    usd_url = "F:/UserData/12_CG/06_IsaacSim/isaac-sim-assets-complete-5.1.0/Assets/Isaac/5.1/Isaac/Robots/BostonDynamics/spot/spot.usd"
     articulation_path = "/"
     controller_z_offset: float = 0.7
 

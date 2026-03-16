@@ -25,6 +25,7 @@ import isaacsim.core.api.objects as objects
 
 from omni.ext.mobility_gen.utils.global_utils import get_stage
 from omni.ext.mobility_gen.utils.stage_utils import stage_add_dome_light
+from omni.ext.mobility_gen.utils.prim_utils import join_prim_path
 from omni.ext.mobility_gen.utils.registry import Registry
 
 
@@ -63,7 +64,7 @@ class RandomCubeScene(SceneBuilder):
 
         stage_add_dome_light(
             stage,
-            os.path.join(prim_path, "dome_light")
+            join_prim_path(prim_path, "dome_light")
         )
 
         for i in range(cls.num_cubes):
@@ -74,7 +75,7 @@ class RandomCubeScene(SceneBuilder):
             theta = random.uniform(-math.pi, math.pi)
 
             objects.FixedCuboid(
-                os.path.join(prim_path, "objects", f"cube_{i}"),
+                join_prim_path(prim_path, "objects", f"cube_{i}"),
                 size=size,
                 color=np.array(color),
                 position=np.array([x, y, size/2]),

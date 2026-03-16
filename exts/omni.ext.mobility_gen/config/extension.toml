@@ -1,3 +1,7 @@
+[core]
+reloadable = true
+order = 0
+
 [package]
 # Semantic Versioning is used: https://semver.org/
 version = "1.0.0"

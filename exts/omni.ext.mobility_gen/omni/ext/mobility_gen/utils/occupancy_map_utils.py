@@ -31,7 +31,7 @@ from omni.ext.mobility_gen.utils.global_utils import (
     get_app,
     get_stage
 )
-from omni.ext.mobility_gen.utils.prim_utils import prim_compute_bbox
+from omni.ext.mobility_gen.utils.prim_utils import join_prim_path, prim_compute_bbox
 from omni.ext.mobility_gen.occupancy_map import (
     OccupancyMap, 
     OccupancyMapDataValue, 
@@ -94,10 +94,9 @@ async def occupancy_map_generate_from_prim_async(
     
 
     # Compute bounds for occupancy map calculation using specified prim
-    prim_path = os.path.join(prim_path)
-    prim_path = stage.GetPrimAtPath(prim_path)
+    prim_path_obj = stage.GetPrimAtPath(prim_path)
 
-    lower_bound, upper_bound, midpoint = prim_compute_bbox(prim_path)
+    lower_bound, upper_bound, midpoint = prim_compute_bbox(prim_path_obj)
     lower_bound = (lower_bound[0], lower_bound[1], z_min)
     upper_bound = (upper_bound[0], upper_bound[1], z_max)
 
@@ -211,7 +210,7 @@ def occupancy_map_add_to_stage(
     Usd.ModelAPI(modelRoot).SetKind(Kind.Tokens.component)
 
     # Add mesh
-    mesh = UsdGeom.Mesh.Define(stage, os.path.join(path, "mesh"))
+    mesh = UsdGeom.Mesh.Define(stage, join_prim_path(path, "mesh"))
     mesh.CreatePointsAttr([(x0, y0, z_offset), (x1, y0, z_offset), (x1, y1, z_offset), (x0, y1, z_offset)])
     mesh.CreateFaceVertexCountsAttr([4])
     mesh.CreateFaceVertexIndicesAttr([0,1,2,3])
@@ -224,18 +223,18 @@ def occupancy_map_add_to_stage(
     texCoords.Set([(0, 0), (1, 0), (1,1), (0, 1)])
 
     # Add material
-    material_path = os.path.join(path, "material")
+    material_path = join_prim_path(path, "material")
     material = UsdShade.Material.Define(stage, material_path)
-    pbrShader = UsdShade.Shader.Define(stage, os.path.join(material_path, "shader"))
+    pbrShader = UsdShade.Shader.Define(stage, join_prim_path(material_path, "shader"))
     pbrShader.CreateIdAttr("UsdPreviewSurface")
     pbrShader.CreateInput("roughness", Sdf.ValueTypeNames.Float).Set(1.0)
     pbrShader.CreateInput("metallic", Sdf.ValueTypeNames.Float).Set(0.0)
     material.CreateSurfaceOutput().ConnectToSource(pbrShader.ConnectableAPI(), "surface")
 
     # Add texture to material
-    stReader = UsdShade.Shader.Define(stage, os.path.join(material_path, "st_reader"))
+    stReader = UsdShade.Shader.Define(stage, join_prim_path(material_path, "st_reader"))
     stReader.CreateIdAttr('UsdPrimvarReader_float2')
-    diffuseTextureSampler = UsdShade.Shader.Define(stage, os.path.join(material_path, "diffuse_texture"))
+    diffuseTextureSampler = UsdShade.Shader.Define(stage, join_prim_path(material_path, "diffuse_texture"))
     diffuseTextureSampler.CreateIdAttr('UsdUVTexture')
     diffuseTextureSampler.CreateInput('file', Sdf.ValueTypeNames.Asset).Set(image_path)
     diffuseTextureSampler.CreateInput("st", Sdf.ValueTypeNames.Float2).ConnectToSource(stReader.ConnectableAPI(), 'result')

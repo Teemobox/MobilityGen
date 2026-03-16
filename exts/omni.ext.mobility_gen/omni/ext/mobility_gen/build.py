@@ -19,6 +19,7 @@ import isaacsim.core.utils.prims as prim_utils
 from isaacsim.core.utils.stage import open_stage
 import isaacsim.core.api.objects as objects
 from isaacsim.core.utils.stage import add_reference_to_stage
+import carb
 
 
 from omni.ext.mobility_gen.occupancy_map import OccupancyMap
@@ -59,6 +60,7 @@ async def build_scenario_from_config(config: Config):
     await world.initialize_simulation_context_async()
     add_reference_to_stage(config.scene_usd,"/World/scene")
     objects.GroundPlane("/World/ground_plane", visible=False)
+    carb.log_info(f"Building robot: {robot_type}")
     robot = robot_type.build("/World/robot")
     occupancy_map = await occupancy_map_generate_from_prim_async(
         "/World/scene",
