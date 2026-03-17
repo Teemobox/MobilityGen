@@ -22,7 +22,7 @@ a recording.
 
 from isaacsim import SimulationApp
 
-simulation_app = SimulationApp(launch_config={"headless": True})
+simulation_app = SimulationApp(launch_config={"headless": False})
 
 import argparse
 import os
@@ -33,11 +33,6 @@ import glob
 import tqdm
 
 import omni.replicator.core as rep
-
-from omni.ext.mobility_gen.utils.global_utils import get_world
-from omni.ext.mobility_gen.writer import Writer
-from omni.ext.mobility_gen.reader import Reader
-from omni.ext.mobility_gen.build import load_scenario
 
 
 if __name__ == "__main__":
@@ -52,8 +47,51 @@ if __name__ == "__main__":
     parser.add_argument("--normals_enabled", type=bool, default=False)
     parser.add_argument("--render_rt_subframes", type=int, default=1)
     parser.add_argument("--render_interval", type=int, default=1)
+    parser.add_argument(
+        "--diagnose_only",
+        action="store_true",
+        help="Only run import/env diagnostics then exit (no replay).",
+    )
 
     args, unknown = parser.parse_known_args()
+
+    # Early, high-signal diagnostics to help debug first-time setup issues.
+    print("============== Diagnostics ==============")
+    print(f"Python: {os.sys.version}")
+    print(f"Platform: {os.name}")
+    print(f"Working dir: {os.getcwd()}")
+    print(f"Input path: {args.input_path!r} exists={os.path.isdir(args.input_path or '')}")
+    if args.output_path:
+        print(f"Output path: {args.output_path!r}")
+    print(f"PATH head: {os.environ.get('PATH','')[:300]}...")
+    try:
+        import isaacsim.asset.gen.omap as _  # noqa: F401
+        print("Import check: isaacsim.asset.gen.omap OK")
+    except Exception as e:
+        print("Import check FAILED: isaacsim.asset.gen.omap")
+        print(repr(e))
+
+    try:
+        from omni.ext.mobility_gen.utils.global_utils import get_world
+        from omni.ext.mobility_gen.writer import Writer
+        from omni.ext.mobility_gen.reader import Reader
+        from omni.ext.mobility_gen.build import load_scenario
+        print("Import check: omni.ext.mobility_gen OK")
+    except Exception as e:
+        print("Import check FAILED: omni.ext.mobility_gen")
+        print(repr(e))
+        raise
+
+    if args.diagnose_only:
+        print("diagnose_only=True, exiting before replay.")
+        simulation_app.close()
+        raise SystemExit(0)
+
+    if not args.input_path or not os.path.isdir(args.input_path):
+        raise FileNotFoundError(f"--input_path not found or not a directory: {args.input_path!r}")
+    if not args.output_path:
+        raise ValueError("--output_path is required")
+    os.makedirs(args.output_path, exist_ok=True)
 
     scenario = load_scenario(os.path.join(args.input_path))
 

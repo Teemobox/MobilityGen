@@ -28,7 +28,8 @@ import argparse
 if "MOBILITY_GEN_DATA" in os.environ:
     DATA_DIR = os.environ['MOBILITY_GEN_DATA']
 else:
-    DATA_DIR = os.path.expanduser("~/MobilityGenData")
+    # DATA_DIR = os.path.expanduser("~/MobilityGenData")
+    DATA_DIR = "C:/isaacsim/_out"
 
 if __name__ == "__main__":
 

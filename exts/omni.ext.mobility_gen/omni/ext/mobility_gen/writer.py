@@ -78,8 +78,26 @@ class Writer:
                 output_folder = os.path.join(self.path, "state", "normals", name)
                 if not os.path.exists(output_folder):
                     os.makedirs(output_folder)
-                output_path = os.path.join(output_folder, f"{step:08d}.npy")
-                np.save(output_path, value)
+
+                # 始终保存原始 numpy 法线数据，方便精确数值使用
+                npy_path = os.path.join(output_folder, f"{step:08d}.npy")
+                np.save(npy_path, value)
+
+                # 额外保存一份可视化用的 PNG 图像，方便直接查看
+                try:
+                    normals = np.asarray(value, dtype=np.float32)
+                    if normals.ndim == 3 and normals.shape[2] == 3:
+                        # 将 [-1, 1] 映射到 [0, 255]
+                        normals_clipped = np.clip(normals, -1.0, 1.0)
+                        normals_01 = (normals_clipped + 1.0) / 2.0
+                        normals_rgb = (normals_01 * 255.0).round().astype(np.uint8)
+
+                        png_path = os.path.join(output_folder, f"{step:08d}.png")
+                        image = PIL.Image.fromarray(normals_rgb, mode="RGB")
+                        image.save(png_path)
+                except Exception:
+                    # 可视化失败不应影响主数据的保存
+                    pass
 
     def write_stage(self):
         if not os.path.exists(self.path):

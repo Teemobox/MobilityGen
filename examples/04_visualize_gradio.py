@@ -22,7 +22,8 @@ import glob
 import os
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--input_dir", type=str, default="~/MobilityGenData/replays")
+# parser.add_argument("--input_dir", type=str, default="~/MobilityGenData/replays")
+parser.add_argument("--input_dir", type=str, default="C:/isaacsim/_out/replays")
 args = parser.parse_args()
 
 directory = os.path.expanduser(args.input_dir)

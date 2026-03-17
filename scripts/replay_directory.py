@@ -28,7 +28,8 @@ import argparse
 if "MOBILITY_GEN_DATA" in os.environ:
     DATA_DIR = os.environ['MOBILITY_GEN_DATA']
 else:
-    DATA_DIR = os.path.expanduser("~/MobilityGenData")
+    # DATA_DIR = os.path.expanduser("~/MobilityGenData")
+    DATA_DIR = "C:/isaacsim/_out"
 
 if __name__ == "__main__":
 
@@ -70,7 +71,7 @@ if __name__ == "__main__":
             print(f"Replaying {name}")
 
             subprocess.call([
-                "./app/python.sh",
+                "./app/python.bat",
                 "scripts/replay_implementation.py",
                 "--ext-folder", "exts",
                 "--enable", "omni.ext.mobility_gen",
